@@ -41,18 +41,27 @@ struct App {
     loaded: Option<PathBuf>,
     undo: Vec<MoveRecord>,
     counts: [Option<usize>; 9],
+    target_inputs: [String; 9],
     message: String,
 }
 impl App {
     fn new() -> Self {
+        let settings = load_settings();
+        let target_inputs = std::array::from_fn(|i| {
+            settings.targets[i]
+                .as_ref()
+                .map(|p| p.display().to_string())
+                .unwrap_or_default()
+        });
         let mut app = Self {
-            settings: load_settings(),
+            settings,
             images: Vec::new(),
             index: 0,
             texture: None,
             loaded: None,
             undo: Vec::new(),
             counts: [None; 9],
+            target_inputs,
             message: String::new(),
         };
         app.refresh_source();
@@ -88,11 +97,21 @@ impl App {
         }
     }
     fn set_target(&mut self, i: usize, p: PathBuf) {
+        self.target_inputs[i] = p.display().to_string();
         self.settings.targets[i] = Some(p);
         self.refresh_counts();
         if let Err(e) = save_settings(&self.settings) {
             self.message = e;
         }
+    }
+    fn save_target_input(&mut self, i: usize) {
+        let path = PathBuf::from(self.target_inputs[i].trim());
+        if !path.is_absolute() || !path.is_dir() {
+            self.message = format!("数字 {}：请输入已存在的绝对文件夹路径", i + 1);
+            return;
+        }
+        self.set_target(i, path);
+        self.message = format!("已保存数字 {} 的目标文件夹", i + 1);
     }
     fn move_current(&mut self, i: usize) {
         let Some(from) = self.images.get(self.index).cloned() else {
@@ -248,7 +267,7 @@ impl eframe::App for App {
                 for i in 0..9 {
                     ui.horizontal(|ui| {
                         ui.strong(format!("{}", i + 1));
-                        if ui.button("设置").clicked() {
+                        if ui.button("选择").clicked() {
                             if let Some(p) = rfd::FileDialog::new().pick_folder() {
                                 self.set_target(i, p);
                             }
@@ -259,12 +278,17 @@ impl eframe::App for App {
                                 .unwrap_or_else(|| "—".into()),
                         );
                     });
-                    ui.small(
-                        self.settings.targets[i]
-                            .as_ref()
-                            .map(|p| p.display().to_string())
-                            .unwrap_or_else(|| "未设置".into()),
-                    );
+                    ui.horizontal(|ui| {
+                        let response = ui.add(
+                            egui::TextEdit::singleline(&mut self.target_inputs[i])
+                                .hint_text("输入文件夹绝对路径"),
+                        );
+                        let enter = response.lost_focus()
+                            && ui.input(|input| input.key_pressed(Key::Enter));
+                        if ui.button("保存").clicked() || enter {
+                            self.save_target_input(i);
+                        }
+                    });
                     ui.separator();
                 }
             });
