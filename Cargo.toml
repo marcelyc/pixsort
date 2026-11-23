@@ -2,6 +2,18 @@
 name = "pixsort"
 version = "0.1.0"
 edition = "2024"
+description = "Pixsort 图片分类工具"
+
+[package.metadata.winresource]
+FileDescription = "Pixsort 图片分类工具"
+ProductName = "Pixsort"
+OriginalFilename = "pixsort.exe"
+InternalName = "Pixsort"
+LegalCopyright = "Copyright © 2026 Pixsort"
+LegalTrademark = "Pixsort"
+
+[build-dependencies]
+winresource = "0.1.34"
 
 [dependencies]
 eframe = "0.37"
