@@ -1,16 +1,22 @@
 [package]
 name = "pixsort"
-version = "0.1.0"
+version = "1.0.0"
 edition = "2024"
-description = "Pixsort 图片分类工具"
+description = "arp"
+
+[[bin]]
+name = "arp"
+path = "src/main.rs"
 
 [package.metadata.winresource]
-FileDescription = "Pixsort 图片分类工具"
-ProductName = "Pixsort"
-OriginalFilename = "pixsort.exe"
-InternalName = "Pixsort"
-LegalCopyright = "Copyright © 2026 Pixsort"
-LegalTrademark = "Pixsort"
+FileDescription = "arp"
+FileVersion = "1.0.0.0"
+ProductName = "arp"
+ProductVersion = "1.0.0.0"
+OriginalFilename = "arp.exe"
+InternalName = "arp"
+LegalCopyright = "arp"
+LegalTrademark = "arp"
 
 [build-dependencies]
 winresource = "0.1.34"

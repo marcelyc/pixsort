@@ -1,3 +1,5 @@
+#![cfg_attr(windows, windows_subsystem = "windows")]
+
 mod files;
 
 use eframe::egui::{self, ColorImage, Key, TextureHandle};
@@ -332,10 +334,19 @@ impl eframe::App for App {
     }
 }
 fn main() -> eframe::Result {
+    let icon = image::load_from_memory(include_bytes!("../assets/icon.png"))
+        .expect("invalid application icon")
+        .resize_exact(256, 256, image::imageops::FilterType::Lanczos3)
+        .to_rgba8();
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Pixsort 图片分类")
-            .with_inner_size([1100.0, 720.0]),
+            .with_inner_size([1100.0, 720.0])
+            .with_icon(egui::IconData {
+                rgba: icon.into_raw(),
+                width: 256,
+                height: 256,
+            }),
         ..Default::default()
     };
     eframe::run_native("Pixsort", options, Box::new(|_| Ok(Box::new(App::new()))))
